@@ -1,0 +1,7 @@
+# Ignorar archivos específicos
+Dataset.ipynb
+regression_1.ipynb
+prueba.py
+
+.idea/
+__pycache__/
