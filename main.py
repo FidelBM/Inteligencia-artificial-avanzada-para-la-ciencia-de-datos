@@ -13,6 +13,10 @@ import math
 
 __errors__ = []
 
+###################################
+# REGRESION LOGISTICA
+###################################
+
 
 def h(params, sample):
     acum = 0
@@ -75,6 +79,10 @@ def predict_proba(params, samples):
 
 def predict(params, samples, threshold=0.5):
     return [1 if h(params, s) >= threshold else 0 for s in samples]
+
+###################################
+# CARGA Y PROCESAMIENTO DE DATOS
+###################################
 
 
 # Subir DataFrame
@@ -225,9 +233,9 @@ def plot_confusion_matrix(y_true, y_pred, title="Matriz de confusión"):
 
 plot_confusion_matrix(y_test, y_pred_test)
 
-
-# ARBOLES DE DESICION
-
+##################################
+# RANDOM FOREST
+##################################
 
 # Separación de los datos en train y test
 
@@ -295,8 +303,6 @@ X_train_2, X_test_2, y_train_2, y_test_2 = train_test_split(
     X_2, y_2, test_size=0.2, random_state=42, stratify=y_2
 )
 
-X_train_2.shape, X_test_2.shape
-
 # Entrenamiento del modelo RandomForest con nuevos hiperparámetros
 rf_2 = RandomForestClassifier(
     n_estimators=500,
@@ -305,12 +311,16 @@ rf_2 = RandomForestClassifier(
     min_samples_split=10,
     max_features=0.5,
     max_samples=0.7,
-    bootstrap=True
+    bootstrap=True,
+    class_weight='balanced'
 )
 rf_2.fit(X_train_2, y_train_2)
 
-#
+y_proba_2 = rf_2.predict_proba(X_test_2)[:, 1]
 y_pred_2 = rf_2.predict(X_test_2)
+RocCurveDisplay.from_predictions(y_test_2, y_proba_2)
+plt.title("Curva ROC - RandomForest")
+plt.show()
 print("Accuracy:", accuracy_score(y_test_2, y_pred_2))
 print("\nReporte de clasificación:\n",
       classification_report(y_test_2, y_pred_2))
@@ -325,7 +335,7 @@ plt.show()
 # Probabilidades de la clase positiva
 train_sizes, train_scores, val_scores = learning_curve(
     estimator=rf_2,
-    X=X, y=y,
+    X=X_2, y=y_2,
     cv=5,
     scoring="accuracy",
     train_sizes=np.linspace(0.1, 1.0, 10),
@@ -362,7 +372,8 @@ plt.plot(sizes_abs, val_mean,   label="Validation")
 plt.plot(sizes_abs, test_scores, label="Testing")
 plt.xlabel("Tamaño de entrenamiento")
 plt.ylabel("Accuracy")
-plt.title("Curva de Aprendizaje¿")
+plt.title("Curva de Aprendizaje")
 plt.legend()
 plt.grid(True)
+plt.ylim(0, 1)
 plt.show()
